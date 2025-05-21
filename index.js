@@ -25,7 +25,7 @@ const app = express();
 const secretKey = uuidv4();
 
 
-app.use(cors());
+
 
 app.use(
     session({
