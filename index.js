@@ -67,7 +67,7 @@ app.use(
     },
     servers: [
       {
-        url: 'http://localhost:3000', // Replace with your Render deployment URL after deployment
+        url: 'https://qodebyte-mgt.onrender.com/', // Replace with your Render deployment URL after deployment
         description: 'Development server',
       },
     ],
