@@ -4356,7 +4356,6 @@ app.delete('/project/:projectId', (req, res) => {
    */
   app.delete('/recent_activity/:activityId', (req, res) => {
     const { activityId } = req.params;
-  
     const query = 'DELETE FROM recent_activity WHERE id = ?';
   
     connection.query(query, [activityId], (err, result) => {
