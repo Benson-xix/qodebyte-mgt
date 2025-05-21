@@ -1,3 +1,4 @@
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2'); 
@@ -122,7 +123,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//register-admin:
+ * https://qodebyte-mgt.onrender.com/register-admin:
  *   post:
  *     summary: Register a new admin
  *     description: Register a new admin account with email, username, and password
@@ -262,7 +263,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//verify-otp:
+ * https://qodebyte-mgt.onrender.com/verify-otp:
  *   post:
  *     summary: Verify OTP for admin registration
  *     description: Verify the OTP sent to the admin's email during registration
@@ -366,7 +367,7 @@ app.use(
 
 /**
  * @swagger 
- * https://qodebyte-mgt.onrender.com//admin_login:
+ * https://qodebyte-mgt.onrender.com/admin_login:
  *   post:
  *     summary: Admin login
  *     description: Login for admin users
@@ -496,7 +497,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//verify-login-otp:
+   * https://qodebyte-mgt.onrender.com/verify-login-otp:
    *   post:
    *     summary: Verify OTP for login
    *     description: Verify the OTP sent to the user's email for login
@@ -580,7 +581,7 @@ app.use(
   
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//admin:
+ * https://qodebyte-mgt.onrender.com/admin:
  *   get:
  *     summary: Get all admin accounts
  *     description: Retrieve a list of all admin accounts
@@ -639,7 +640,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//admin/{adminId}:
+   * https://qodebyte-mgt.onrender.com/admin/{adminId}:
    *   get:
    *     summary: Get an admin account by ID
    *     description: Retrieve an admin account by its ID
@@ -721,7 +722,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//admin/{adminId}:
+ * https://qodebyte-mgt.onrender.com/admin/{adminId}:
  *   put:
  *     summary: Update an admin account
  *     description: Update the email, username, or password of an admin account
@@ -916,7 +917,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//admin/{adminId}:
+ * https://qodebyte-mgt.onrender.com/admin/{adminId}:
  *   delete:
  *     summary: Delete an admin account
  *     description: Deletes an admin account by ID
@@ -998,7 +999,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//forgot-password:
+ * https://qodebyte-mgt.onrender.com/forgot-password:
  *   post:
  *     summary: Request a password reset OTP
  *     description: Sends an OTP to the user's email for password reset
@@ -1123,7 +1124,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//verify-forgot-password-otp:
+   * https://qodebyte-mgt.onrender.com/verify-forgot-password-otp:
    *   post:
    *     summary: Verify OTP for forgot password
    *     description: Verify the OTP sent to the user's email for password reset
@@ -1204,7 +1205,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//create_project:
+   * https://qodebyte-mgt.onrender.com/create_project:
    *   post:
    *     summary: Create a new project
    *     description: Create a new project with the provided details
@@ -1365,7 +1366,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//project:
+ * https://qodebyte-mgt.onrender.com/project:
  *   get:
  *     summary: Get all projects
  *     description: Retrieve a list of all projects
@@ -1465,7 +1466,7 @@ app.get('/project', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//project/{projectId}:
+ * https://qodebyte-mgt.onrender.com/project/{projectId}:
  *   get:
  *     summary: Get a project by ID
  *     description: Retrieve a project by its ID
@@ -1587,7 +1588,7 @@ app.get('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//project/{projectId}:
+ * https://qodebyte-mgt.onrender.com/project/{projectId}:
  *   patch:
  *     summary: Update a project
  *     description: Update the details of a project by its ID
@@ -1787,7 +1788,7 @@ app.get('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//project/{projectId}:
+   * https://qodebyte-mgt.onrender.com/project/{projectId}:
    *   delete:
    *     summary: Delete a project
    *     description: Delete a project by its ID
@@ -1857,7 +1858,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//project-stats:
+   * https://qodebyte-mgt.onrender.com/project-stats:
    *   get:
    *     summary: Get project statistics
    *     description: Retrieve statistics about projects, including total, completed, ongoing, and overdue projects.
@@ -1985,7 +1986,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//create_staff:
+   * https://qodebyte-mgt.onrender.com/create_staff:
    *   post:
    *     summary: Create a new staff member
    *     description: Create a new staff member with the provided details
@@ -2135,7 +2136,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs:
+   * https://qodebyte-mgt.onrender.com/staffs:
    *   get:
    *     summary: Get all staff members
    *     description: Retrieve a list of all staff members
@@ -2235,7 +2236,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}:
    *   get:
    *     summary: Get a specific staff member
    *     description: Retrieve details of a specific staff member by ID
@@ -2360,7 +2361,7 @@ app.delete('/project/:projectId', (req, res) => {
 
     /**   
      * @swagger
-     * https://qodebyte-mgt.onrender.com//staffs/{staffId}:
+     * https://qodebyte-mgt.onrender.com/staffs/{staffId}:
      *   patch:
      *     summary: Update a specific staff member
      *     description: Update a specific staff member's details
@@ -2537,7 +2538,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//upload_document/{staffId}:
+   * https://qodebyte-mgt.onrender.com/upload_document/{staffId}:
    *   post:
    *     summary: Upload a document for a specific staff member
    *     description: Upload a document for a specific staff member
@@ -2639,7 +2640,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}/documents:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents:
    *   get:
    *     summary: Get all documents for a specific staff member
    *     description: Retrieve all documents associated with a specific staff member
@@ -2724,7 +2725,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}/documents/{documentId}:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
    *   get:
    *     summary: Get a specific document for a specific staff member
    *     description: Retrieve a specific document associated with a specific staff member
@@ -2818,7 +2819,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}/documents/{documentId}:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
    *   patch:
    *     summary: Update a document for a specific staff member
    *     description: Update a document associated with a specific staff member
@@ -2923,7 +2924,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}/documents/{documentId}:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
    *   delete:
    *     summary: Delete a document for a specific staff member
    *     description: Delete a document associated with a specific staff member
@@ -3020,7 +3021,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//staffs/{staffId}/documents/{documentId}/download:
+   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}/download:
    *   get:
    *     summary: Download a document for a specific staff member
    *     description: Download a document associated with a specific staff member
@@ -3115,7 +3116,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//expense:
+   * https://qodebyte-mgt.onrender.com/expense:
    *   get:
    *     summary: Get all expense records
    *     description: Retrieve all expense records
@@ -3185,7 +3186,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//expense/{expenseId}:
+   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
    *   get:
    *     summary: Get an expense record by ID
    *     description: Retrieve an expense record by its ID
@@ -3276,7 +3277,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//expense/{expenseId}:
+   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
    *   patch:
    *     summary: Update an expense record
    *     description: Update an expense record by its ID
@@ -3407,7 +3408,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//expense/{expenseId}:
+   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
    *   delete:
    *     summary: Delete an expense record
    *     description: Delete an expense record by its ID
@@ -3478,7 +3479,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com//revenue:  
+   * https://qodebyte-mgt.onrender.com/revenue:  
    *   post:
    *     summary: Create a new revenue record
    *     description: Add a new revenue record to the database
@@ -3581,7 +3582,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
   /**
    * @swagger
-   * https://qodebyte-mgt.onrender.com//revenue:
+   * https://qodebyte-mgt.onrender.com/revenue:
    *   get:
    *     summary: Get all revenue records
    *     description: Retrieve a list of all revenue records
@@ -3657,7 +3658,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
 /**
  * @swagger
- * https://qodebyte-mgt.onrender.com//revenue/{revenueId}:
+ * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
  *   get:
  *     summary: Get a revenue record by ID
  *     description: Fetch a revenue record by its ID
@@ -3768,7 +3769,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//revenue/{revenueId}:
+   * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
    *   patch:
    *     summary: Update a revenue record
    *     description: Update a revenue record by its ID
@@ -3909,7 +3910,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//revenue/{revenueId}:
+   * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
    *   delete:
    *     summary: Delete a revenue record
    *     description: Delete a revenue record by its ID
@@ -3980,7 +3981,7 @@ app.delete('/project/:projectId', (req, res) => {
 
 /**
  * @swagger
- * https://qodebyte-mgt.onrender.com//finance-stats:
+ * https://qodebyte-mgt.onrender.com/finance-stats:
  *   get:
  *     summary: Fetch finance statistics
  *     description: Retrieve total revenue, total expense, and net profit with optional filters for month and year.
@@ -4125,7 +4126,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**
  * @swagger
- * https://qodebyte-mgt.onrender.com//recent_activity:
+ * https://qodebyte-mgt.onrender.com/recent_activity:
  *   get:
  *     summary: Fetch all recent activities
  *     description: Retrieve a list of all recent activities with optional filters for month and year.
@@ -4219,7 +4220,7 @@ app.delete('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com//recent_activity/{activityId}:
+ * https://qodebyte-mgt.onrender.com/recent_activity/{activityId}:
  *   get:
  *     summary: Get a recent activity record by ID
  *     description: Fetch a recent activity record by its ID
@@ -4308,7 +4309,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com//recent_activity/{activityId}:
+   * https://qodebyte-mgt.onrender.com/recent_activity/{activityId}:
    *   delete:
    *     summary: Delete a recent activity record
    *     description: Delete a recent activity record by its ID
@@ -4375,7 +4376,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**
    * @swagger
-   * https://qodebyte-mgt.onrender.com//:
+   * https://qodebyte-mgt.onrender.com/:
    *   get:
    *     summary: Welcome message
    *     description: Returns a welcome message for the API
@@ -4396,6 +4397,8 @@ app.delete('/project/:projectId', (req, res) => {
     res.send('Welcome to the Project Management API');
   });
 
+
+  app.use(cors());
 
 
   app.listen(port, () => {
