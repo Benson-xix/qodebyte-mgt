@@ -637,6 +637,88 @@ app.use(
     });
   });
 
+  /**
+   * @swagger
+   * http://localhost:3000/admin/{email}:
+   *   get:
+   *     summary: Get an admin account by email
+   *     description: Retrieve an admin account by its email
+   *     parameters:
+   *       - in: path
+   *         name: email
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Email of the admin account to retrieve
+   *     responses:
+   *       200:
+   *         description: Admin account fetched successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 id:
+   *                   type: integer
+   *                   description: Admin ID
+   *                   example: 1
+   *                 email:
+   *                   type: string
+   *                   description: Email of the admin
+   *                   example: admin@example.com
+   *                 username:
+   *                   type: string
+   *                   description: Username of the admin
+   *                   example: adminuser
+   *                 created_at:
+   *                   type: string
+   *                   format: date-time
+   *                   description: Timestamp of when the admin account was created
+   *                   example: 2023-10-01T12:00:00Z
+   *       404:
+   *         description: Admin account not found
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   description: Error message
+   *                   example: Admin account not found
+   *       500:
+   *         description: Failed to fetch admin account
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   description: Error message
+   *                   example: Failed to fetch admin account
+   */
+
+  app.get('/admin/:email', (req, res) => {
+    const { email } = req.params;
+    
+    const query = 'SELECT id, email, username, created_at FROM admin WHERE email = ?';
+    
+    connection.query(query, [email], (err, results) => {
+      if (err) {
+        console.error('Error fetching admin:', err);
+        return res.status(500).json({ error: 'Failed to fetch admin account' });
+      }
+      
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'Admin account not found' });
+      }
+      
+      logActivity('READ', 'admin', `Fetched admin account with ID ${email}`, 'Admin');
+      res.status(200).json(results[0]);
+    });
+  });
+
   /** 
    * @swagger
    * http://localhost:3000/admin/{adminId}:
