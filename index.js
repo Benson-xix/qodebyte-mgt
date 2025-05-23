@@ -22,6 +22,7 @@ dotenv.config();
 
 const port = process.env.PORT || 3000;
 const app = express();
+app.use(cors());
 const secretKey = uuidv4();
 
 
@@ -4490,7 +4491,7 @@ const graphQuery = `
   });
 
 
-  app.use(cors());
+
 
 
   app.listen(port, () => {
