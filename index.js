@@ -2084,155 +2084,168 @@ app.delete('/project/:projectId', (req, res) => {
   });
 
 
-  /**   
-   * @swagger
-   * /create_staff:
-   *   post:
-   *     summary: Create a new staff member
-   *     description: Create a new staff member with the provided details
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               first_name:
-   *                 type: string
-   *                 description: First name of the staff member
-   *                 example: John
-   *               last_name:
-   *                 type: string
-   *                 description: Last name of the staff member
-   *                 example: Doe
-   *               email:
-   *                 type: string
-   *                 description: Email of the staff member
-   *                 example: john.doe@example.com
-   *               address:
-   *                 type: string
-   *                 description: Address of the staff member
-   *                 example: 123 Main St
-   *               phone:
-   *                 type: string
-   *                 description: Phone number of the staff member
-   *                 example: +1234567890
-   *               job_role:
-   *                 type: string
-   *                 description: Job role of the staff member
-   *                 example: Software Engineer
-   *               salary:
-   *                 type: number
-   *                 description: Salary of the staff member
-   *                 example: 50000
-   *               working_days:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *                 description: Working days of the staff member
-   *                 example: ["Monday", "Tuesday"]
-   *               skills:
-   *                 type: array
-   *                 items:
-   *                   type: string
-   *                 description: Skills of the staff member
-   *                 example: ["JavaScript", "Node.js"]
-   *     responses:
-   *       201:
-   *         description: Staff created successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   description: Success message
-   *                   example: Staff created successfully
-   *                 staffId:
-   *                   type: integer
-   *                   description: ID of the created staff member
-   *                   example: 1
-   *       400:
-   *         description: Bad request
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *                   description: Error message
-   *                   example: First Name, Last Name, and Email are required
-   *       500:
-   *         description: Failed to create staff
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *                   description: Error message
-   *                   example: Failed to create staff
-   */
+  /**
+ * @swagger
+ * /create_staff:
+ *   post:
+ *     summary: Create a new staff member
+ *     description: Create a new staff member with the provided details
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 description: First name of the staff member
+ *                 example: John
+ *               last_name:
+ *                 type: string
+ *                 description: Last name of the staff member
+ *                 example: Doe
+ *               email:
+ *                 type: string
+ *                 description: Email of the staff member
+ *                 example: john.doe@example.com
+ *               address:
+ *                 type: string
+ *                 description: Address of the staff member
+ *                 example: 123 Main St
+ *               gender:
+ *                 type: string
+ *                 description: Gender of the staff member
+ *                 example: male
+ *                 enum: [male, female]
+ *               phone:
+ *                 type: string
+ *                 description: Phone number of the staff member
+ *                 example: +1234567890
+ *               job_role:
+ *                 type: string
+ *                 description: Job role of the staff member
+ *                 example: Software Engineer
+ *               salary:
+ *                 type: number
+ *                 description: Salary of the staff member
+ *                 example: 50000
+ *               working_days:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Working days of the staff member
+ *                 example: ["Monday", "Tuesday"]
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Skills of the staff member
+ *                 example: ["JavaScript", "Node.js"]
+ *     responses:
+ *       201:
+ *         description: Staff created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Staff created successfully
+ *                 staffId:
+ *                   type: integer
+ *                   description: ID of the created staff member
+ *                   example: 1
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: First Name, Last Name, Email, and Gender are required
+ *       500:
+ *         description: Failed to create staff
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Failed to create staff
+ */
   app.post('/create_staff', (req, res) => {
-    const {
-      first_name,
-      last_name,
-      email,
-      address,
-      phone,
-      job_role,
-      salary,
-      working_days,
-      skills,
-    } = req.body;
-  
-    if (!first_name || !last_name || !email) {
-      return res.status(400).json({ error: 'First Name, Last Name, and Email are required' });
-    }
-  
-    const workingDaysJson = JSON.stringify(working_days || []);
-    const skillsJson = JSON.stringify(skills || []);
-    const documentIdsJson = JSON.stringify([]);
-  
-    const query = `
-      INSERT INTO staffs (
-        first_name, last_name, email, address, phone, job_role, salary, working_days, 
-        skills, document_ids
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-  
-    const values = [
-      first_name,
-      last_name,
-      email,
-      address,
-      phone,
-      job_role,
-      salary,
-      workingDaysJson,
-      skillsJson,
-      documentIdsJson,
-    ];
-  
-    connection.query(query, values, (err, result) => {
-      if (err) {
-        console.error('Error creating staff:', err);
-        return res.status(500).json({ error: 'Failed to create staff' });
-      }
+  const {
+    first_name,
+    last_name,
+    email,
+    address,
+    phone,
+    job_role,
+    salary,
+    working_days,
+    skills,
+    gender, 
+  } = req.body;
 
-      logActivity(
-        'INSERT',
-        'staffs',
-        `Created a new staff with ID ${result.insertId} and email ${email}`,
-        'Admin'
-      );
-  
-      res.status(201).json({ message: 'Staff created successfully', staffId: result.insertId });
-    });
+  if (!first_name || !last_name || !email || !gender) {
+    return res.status(400).json({ error: 'First Name, Last Name, Email, and Gender are required' });
+  }
+
+  if (!['male', 'female'].includes(gender)) {
+    return res.status(400).json({ error: 'Gender must be either "male" or "female"' });
+  }
+
+  const workingDaysJson = JSON.stringify(working_days || []);
+  const skillsJson = JSON.stringify(skills || []);
+  const documentIdsJson = JSON.stringify([]);
+
+  const query = `
+    INSERT INTO staffs (
+      first_name, last_name, email, address, phone, job_role, salary, 
+      working_days, skills, document_ids, gender, staff_status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    first_name,
+    last_name,
+    email,
+    address,
+    phone,
+    job_role,
+    salary,
+    workingDaysJson,
+    skillsJson,
+    documentIdsJson,
+    gender, 
+    0
+  ];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error creating staff:', err);
+      return res.status(500).json({ error: 'Failed to create staff' });
+    }
+
+    logActivity(
+      'INSERT',
+      'staffs',
+      `Created a new staff with ID ${result.insertId} and email ${email}`,
+      'Admin'
+    );
+
+    res.status(201).json({ message: 'Staff created successfully', staffId: result.insertId });
   });
+});
+
 
   /**   
    * @swagger
@@ -2459,182 +2472,247 @@ app.delete('/project/:projectId', (req, res) => {
     });
   });
 
-    /**   
-     * @swagger
-     * /staffs/{staffId}:
-     *   patch:
-     *     summary: Update a specific staff member
-     *     description: Update a specific staff member's details
-     *     parameters:
-     *       - in: path
-     *         name: staffId
-     *         required: true
-     *         schema:
-     *           type: integer
-     *         description: ID of the staff member to update
-     *     requestBody:
-     *       required: true
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             properties:
-     *               first_name:
-     *                 type: string
-     *                 description: First name of the staff member
-     *               last_name:
-     *                 type: string
-     *                 description: Last name of the staff member
-     *               email:
-     *                 type: string
-     *                 description: Email of the staff member
-     *               address:
-     *                 type: string
-     *                 description: Address of the staff member
-     *               phone:
-     *                 type: string
-     *                 description: Phone number of the staff member
-     *               job_role:
-     *                 type: string
-     *                 description: Job role of the staff member
-     *               salary:
-     *                 type: number
-     *                 description: Salary of the staff member
-     *               working_days:
-     *                 type: array
-     *                 items:
-     *                   type: string
-     *                 description: Working days of the staff member
-     *               skills:
-     *                 type: array
-     *                 items:
-     *                   type: string
-     *                 description: Skills of the staff member
-     *     responses:
-     *       200:
-     *         description: Staff updated successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 message:
-     *                   type: string
-     *                   description: Success message
-     *                   example: Staff updated successfully
-     *       400:
-     *         description: Bad request
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 error:
-     *                   type: string
-     *                   description: Error message
-     *                   example: No fields to update
-     *       404:
-     *         description: Staff not found
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 error:
-     *                   type: string
-     *                   description: Error message
-     *                   example: Staff not found
-     *       500:
-     *         description: Failed to update staff
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 error:
-     *                   type: string
-     *                   description: Error message
-     *                   example: Failed to update staff
-     */
+     /**
+ * @swagger
+ * /staffs/{staffId}:
+ *   patch:
+ *     summary: Update a specific staff member's details
+ *     description: Update any field of a staff member including performance metrics and status
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 description: First name of the staff member
+ *               last_name:
+ *                 type: string
+ *                 description: Last name of the staff member
+ *               email:
+ *                 type: string
+ *                 description: Email of the staff member
+ *               address:
+ *                 type: string
+ *                 description: Address of the staff member
+ *               phone:
+ *                 type: string
+ *                 description: Phone number of the staff member
+ *               job_role:
+ *                 type: string
+ *                 description: Job role of the staff member
+ *               salary:
+ *                 type: number
+ *                 description: Salary of the staff member
+ *               working_days:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Working days of the staff member
+ *               skills:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Skills of the staff member
+ *               check_in_percentage:
+ *                 type: number
+ *                 format: float
+ *                 description: Percentage of check-ins (0.00 to 100.00)
+ *               leave_request:
+ *                 type: integer
+ *                 description: Number of leave requests
+ *               project_completion_status:
+ *                 type: number
+ *                 format: float
+ *                 description: Percentage of projects completed (0.00 to 100.00)
+ *               ongoing_project_no:
+ *                 type: integer
+ *                 description: Number of ongoing projects
+ *               overdue_project_no:
+ *                 type: integer
+ *                 description: Number of overdue projects
+ *               all_projects:
+ *                 type: integer
+ *                 description: Total number of projects assigned
+ *               staff_status:
+ *                 type: integer
+ *                 description: Staff status (0=active, 1=on leave, 2=terminated)
+ *                 enum: [0, 1, 2]
+ *     responses:
+ *       200:
+ *         description: Staff updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: Staff updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: No fields to update
+ *       404:
+ *         description: Staff not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Staff not found
+ *       500:
+ *         description: Failed to update staff
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Failed to update staff
+ */
+app.patch('/staffs/:staffId', (req, res) => {
+  const { staffId } = req.params;
+  const {
+    first_name,
+    last_name,
+    email,
+    address,
+    phone,
+    job_role,
+    salary,
+    working_days,
+    skills,
+    check_in_percentage,
+    leave_request,
+    project_completion_status,
+    ongoing_project_no,
+    overdue_project_no,
+    all_projects,
+    staff_status
+  } = req.body;
 
-  app.patch('/staffs/:staffId', (req, res) => {
-    const { staffId } = req.params;
-    const {
-      first_name,
-      last_name,
-      email,
-      address,
-      phone,
-      job_role,
-      salary,
-      working_days,
-      skills,
-    } = req.body;
-  
-    const updateFields = [];
-    const updateValues = [];
-  
-    if (first_name) {
-      updateFields.push('first_name = ?');
-      updateValues.push(first_name);
-    }
-    if (last_name) {
-      updateFields.push('last_name = ?');
-      updateValues.push(last_name);
-    }
-    if (email) {
-      updateFields.push('email = ?');
-      updateValues.push(email);
-    }
-    if (address) {
-      updateFields.push('address = ?');
-      updateValues.push(address);
-    }
-    if (phone) {
-      updateFields.push('phone = ?');
-      updateValues.push(phone);
-    }
-    if (job_role) {
-      updateFields.push('job_role = ?');
-      updateValues.push(job_role);
-    }
-    if (salary) {
-      updateFields.push('salary = ?');
-      updateValues.push(salary);
-    }
-    if (working_days) {
-      updateFields.push('working_days = ?');
-      updateValues.push(JSON.stringify(working_days));
-    }
-    if (skills) {
-      updateFields.push('skills = ?');
-      updateValues.push(JSON.stringify(skills));
-    }
-  
-    if (updateFields.length === 0) {
-      return res.status(400).json({ error: 'No fields to update' });
-    }
-  
-    const query = `UPDATE staffs SET ${updateFields.join(', ')} WHERE id = ?`;
-    updateValues.push(staffId);
-  
-    connection.query(query, updateValues, (err, result) => {
-      if (err) {
-        console.error('Error updating staff:', err);
-        logActivity('ERROR', 'staffs', `Error updating staff with ID ${staffId}`, 'Admin');
-        return res.status(500).json({ error: 'Failed to update staff' });
-      }
-  
-      if (result.affectedRows === 0) {
-        logActivity('FAILED', 'staffs', `Staff not found with ID ${staffId}`, 'Admin');
-        return res.status(404).json({ error: 'Staff not found' });
-      }
+  const updateFields = [];
+  const updateValues = [];
 
-      logActivity('UPDATE', 'staffs', `Updated staff with ID ${staffId}`, 'Admin');
-      res.status(200).json({ message: 'Staff updated successfully' });
-    });
+  // Personal Information
+  if (first_name) {
+    updateFields.push('first_name = ?');
+    updateValues.push(first_name);
+  }
+  if (last_name) {
+    updateFields.push('last_name = ?');
+    updateValues.push(last_name);
+  }
+  if (email) {
+    updateFields.push('email = ?');
+    updateValues.push(email);
+  }
+  if (address) {
+    updateFields.push('address = ?');
+    updateValues.push(address);
+  }
+  if (phone) {
+    updateFields.push('phone = ?');
+    updateValues.push(phone);
+  }
+  if (job_role) {
+    updateFields.push('job_role = ?');
+    updateValues.push(job_role);
+  }
+  if (salary) {
+    updateFields.push('salary = ?');
+    updateValues.push(salary);
+  }
+  if (working_days) {
+    updateFields.push('working_days = ?');
+    updateValues.push(JSON.stringify(working_days));
+  }
+  if (skills) {
+    updateFields.push('skills = ?');
+    updateValues.push(JSON.stringify(skills));
+  }
+
+  // Performance Metrics
+  if (check_in_percentage !== undefined) {
+    updateFields.push('check_in_percentage = ?');
+    updateValues.push(check_in_percentage);
+  }
+  if (leave_request !== undefined) {
+    updateFields.push('leave_request = ?');
+    updateValues.push(leave_request);
+  }
+  if (project_completion_status !== undefined) {
+    updateFields.push('project_completion_status = ?');
+    updateValues.push(project_completion_status);
+  }
+  if (ongoing_project_no !== undefined) {
+    updateFields.push('ongoing_project_no = ?');
+    updateValues.push(ongoing_project_no);
+  }
+  if (overdue_project_no !== undefined) {
+    updateFields.push('overdue_project_no = ?');
+    updateValues.push(overdue_project_no);
+  }
+  if (all_projects !== undefined) {
+    updateFields.push('all_projects = ?');
+    updateValues.push(all_projects);
+  }
+
+  // Status
+  if (staff_status !== undefined) {
+    if (![0, 1, 2].includes(staff_status)) {
+      return res.status(400).json({ error: 'staff_status must be 0 (active), 1 (on leave), or 2 (terminated)' });
+    }
+    updateFields.push('staff_status = ?');
+    updateValues.push(staff_status);
+  }
+
+  if (updateFields.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+
+  const query = `UPDATE staffs SET ${updateFields.join(', ')} WHERE id = ?`;
+  updateValues.push(staffId);
+
+  connection.query(query, updateValues, (err, result) => {
+    if (err) {
+      console.error('Error updating staff:', err);
+      logActivity('ERROR', 'staffs', `Error updating staff with ID ${staffId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to update staff' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'staffs', `Staff not found with ID ${staffId}`, 'Admin');
+      return res.status(404).json({ error: 'Staff not found' });
+    }
+
+    logActivity('UPDATE', 'staffs', `Updated staff with ID ${staffId}`, 'Admin');
+    res.status(200).json({ message: 'Staff updated successfully' });
   });
-
+});
 
   /**   
    * @swagger
