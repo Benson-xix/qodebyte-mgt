@@ -3397,6 +3397,67 @@ app.get('/staff-stats', async (req, res) => {
     });
   });
 
+/** 
+   * @swagger
+   * https://qodebyte-mgt.onrender.com/expense:
+   *   post:
+   *     summary: Create a new expense record
+   *     description: Create a new expense record
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               amount:
+   *                 type: number
+   *                 description: Amount of the expense
+   *                 example: 500.00
+   *               expense_category:
+   *                 type: string
+   *                 description: Category of the expense
+   *                 example: Office Supplies
+   *               description:
+   *                 type: string
+   *                 description: Description of the expense
+   *                 example: Purchased office chairs
+   *     responses:
+   *       201:
+   *         description: Expense created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: Expense created successfully
+   *                 expenseId:
+   *                   type: integer
+   *                   example: 1
+   *       400:
+   *         description: Bad request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Amount, Expense Category, and Description are required
+   *       500:
+   *         description: Failed to create expense
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Failed to create expense
+   */
+
   app.post('/expense', (req, res) => {
     const { amount, expense_category, description } = req.body;
   
