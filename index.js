@@ -640,7 +640,7 @@ app.use(
 
   /**
    * @swagger
-   * http://localhost:3000/admin/{email}:
+   * https://qodebyte-mgt.onrender.com/admin/{email}:
    *   get:
    *     summary: Get an admin account by email
    *     description: Retrieve an admin account by its email
@@ -804,7 +804,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/admin/{adminId}:
+ * /admin/{adminId}:
  *   put:
  *     summary: Update an admin account
  *     description: Update the email, username, or password of an admin account
@@ -999,7 +999,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/admin/{adminId}:
+ * /admin/{adminId}:
  *   delete:
  *     summary: Delete an admin account
  *     description: Deletes an admin account by ID
@@ -1081,7 +1081,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/forgot-password:
+ * /forgot-password:
  *   post:
  *     summary: Request a password reset OTP
  *     description: Sends an OTP to the user's email for password reset
@@ -1206,7 +1206,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/verify-forgot-password-otp:
+   * /verify-forgot-password-otp:
    *   post:
    *     summary: Verify OTP for forgot password
    *     description: Verify the OTP sent to the user's email for password reset
@@ -1287,7 +1287,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/create_project:
+   * /create_project:
    *   post:
    *     summary: Create a new project
    *     description: Create a new project with the provided details
@@ -1448,7 +1448,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/project:
+ * /project:
  *   get:
  *     summary: Get all projects
  *     description: Retrieve a list of all projects
@@ -1548,7 +1548,7 @@ app.get('/project', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/project/{projectId}:
+ * /project/{projectId}:
  *   get:
  *     summary: Get a project by ID
  *     description: Retrieve a project by its ID
@@ -1670,7 +1670,7 @@ app.get('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/project/{projectId}:
+ * /project/{projectId}:
  *   patch:
  *     summary: Update a project
  *     description: Update the details of a project by its ID
@@ -1870,7 +1870,7 @@ app.get('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/project/{projectId}:
+   * /project/{projectId}:
    *   delete:
    *     summary: Delete a project
    *     description: Delete a project by its ID
@@ -1940,7 +1940,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/project-stats:
+   * /project-stats:
    *   get:
    *     summary: Get project statistics
    *     description: Retrieve statistics about projects, including total, completed, ongoing, and overdue projects.
@@ -2068,7 +2068,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/create_staff:
+   * /create_staff:
    *   post:
    *     summary: Create a new staff member
    *     description: Create a new staff member with the provided details
@@ -2218,7 +2218,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs:
+   * /staffs:
    *   get:
    *     summary: Get all staff members
    *     description: Retrieve a list of all staff members
@@ -2318,7 +2318,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}:
+   * /staffs/{staffId}:
    *   get:
    *     summary: Get a specific staff member
    *     description: Retrieve details of a specific staff member by ID
@@ -2443,7 +2443,7 @@ app.delete('/project/:projectId', (req, res) => {
 
     /**   
      * @swagger
-     * https://qodebyte-mgt.onrender.com/staffs/{staffId}:
+     * /staffs/{staffId}:
      *   patch:
      *     summary: Update a specific staff member
      *     description: Update a specific staff member's details
@@ -2620,7 +2620,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/upload_document/{staffId}:
+   * /upload_document/{staffId}:
    *   post:
    *     summary: Upload a document for a specific staff member
    *     description: Upload a document for a specific staff member
@@ -2722,7 +2722,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents:
+   * /staffs/{staffId}/documents:
    *   get:
    *     summary: Get all documents for a specific staff member
    *     description: Retrieve all documents associated with a specific staff member
@@ -2807,7 +2807,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
+   * /staffs/{staffId}/documents/{documentId}:
    *   get:
    *     summary: Get a specific document for a specific staff member
    *     description: Retrieve a specific document associated with a specific staff member
@@ -2901,7 +2901,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
+   * /staffs/{staffId}/documents/{documentId}:
    *   patch:
    *     summary: Update a document for a specific staff member
    *     description: Update a document associated with a specific staff member
@@ -3006,7 +3006,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}:
+   * /staffs/{staffId}/documents/{documentId}:
    *   delete:
    *     summary: Delete a document for a specific staff member
    *     description: Delete a document associated with a specific staff member
@@ -3103,7 +3103,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/staffs/{staffId}/documents/{documentId}/download:
+   * /staffs/{staffId}/documents/{documentId}/download:
    *   get:
    *     summary: Download a document for a specific staff member
    *     description: Download a document associated with a specific staff member
@@ -3198,7 +3198,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/expense:
+   * /expense:
    *   get:
    *     summary: Get all expense records
    *     description: Retrieve all expense records
@@ -3268,7 +3268,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
+   * /expense/{expenseId}:
    *   get:
    *     summary: Get an expense record by ID
    *     description: Retrieve an expense record by its ID
@@ -3359,7 +3359,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
+   * /expense/{expenseId}:
    *   patch:
    *     summary: Update an expense record
    *     description: Update an expense record by its ID
@@ -3490,7 +3490,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/expense/{expenseId}:
+   * /expense/{expenseId}:
    *   delete:
    *     summary: Delete an expense record
    *     description: Delete an expense record by its ID
@@ -3561,7 +3561,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**   
    * @swagger
-   * https://qodebyte-mgt.onrender.com/revenue:  
+   * /revenue:  
    *   post:
    *     summary: Create a new revenue record
    *     description: Add a new revenue record to the database
@@ -3664,7 +3664,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
   /**
    * @swagger
-   * https://qodebyte-mgt.onrender.com/revenue:
+   * /revenue:
    *   get:
    *     summary: Get all revenue records
    *     description: Retrieve a list of all revenue records
@@ -3740,7 +3740,7 @@ app.delete('/project/:projectId', (req, res) => {
   });
 /**
  * @swagger
- * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
+ * /revenue/{revenueId}:
  *   get:
  *     summary: Get a revenue record by ID
  *     description: Fetch a revenue record by its ID
@@ -3851,7 +3851,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
+   * /revenue/{revenueId}:
    *   patch:
    *     summary: Update a revenue record
    *     description: Update a revenue record by its ID
@@ -3992,7 +3992,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/revenue/{revenueId}:
+   * /revenue/{revenueId}:
    *   delete:
    *     summary: Delete a revenue record
    *     description: Delete a revenue record by its ID
@@ -4063,7 +4063,7 @@ app.delete('/project/:projectId', (req, res) => {
 
 /**
  * @swagger
- * https://qodebyte-mgt.onrender.com/finance-stats:
+ * /finance-stats:
  *   get:
  *     summary: Fetch finance statistics
  *     description: Retrieve total revenue, total expense, and net profit with optional filters for month and year.
@@ -4129,64 +4129,74 @@ app.delete('/project/:projectId', (req, res) => {
  *                   description: Error message
  *                   example: Month and year are required
  */
-  app.get('/finance-stats', (req, res) => {
-    const { month, year } = req.query;
-  
-    let totalRevenueQuery = 'SELECT SUM(amount) AS total_revenue FROM revenue';
-    let totalExpenseQuery = 'SELECT SUM(amount) AS total_expense FROM expense';
-    let graphQuery = `
-      SELECT 
-        MONTHNAME(created_at) AS month, 
-        SUM(CASE WHEN table_name = 'revenue' THEN amount ELSE 0 END) AS total_revenue,
-        SUM(CASE WHEN table_name = 'expense' THEN amount ELSE 0 END) AS total_expense
-      FROM (
-        SELECT 'revenue' AS table_name, amount, created_at FROM revenue
-        UNION ALL
-        SELECT 'expense' AS table_name, amount, created_at FROM expense
-      ) AS combined
-      GROUP BY MONTH(created_at), YEAR(created_at)
-      ORDER BY YEAR(created_at), MONTH(created_at)
-    `;
-  
-    const filters = [];
-    if (month) {
-      filters.push(`MONTH(created_at) = ${mysql.escape(month)}`);
+app.get('/finance-stats', (req, res) => {
+  const { month, year } = req.query;
+
+  let revenueWhere = '';
+  let expenseWhere = '';
+  const filters = [];
+  if (month) filters.push(`MONTH(created_at) = ${mysql.escape(month)}`);
+  if (year) filters.push(`YEAR(created_at) = ${mysql.escape(year)}`);
+  if (filters.length > 0) {
+    const whereClause = ` WHERE ${filters.join(' AND ')}`;
+    revenueWhere = whereClause;
+    expenseWhere = whereClause;
+  }
+
+  const totalRevenueQuery = `SELECT SUM(amount) AS total_revenue FROM revenue${revenueWhere}`;
+  const totalExpenseQuery = `SELECT SUM(amount) AS total_expense FROM expense${expenseWhere}`;
+const graphQuery = `
+  SELECT 
+    YEAR(created_at) AS year,
+    MONTH(created_at) AS month_number,
+    MONTHNAME(created_at) AS month,
+    SUM(CASE WHEN table_name = 'revenue' THEN amount ELSE 0 END) AS total_revenue,
+    SUM(CASE WHEN table_name = 'expense' THEN amount ELSE 0 END) AS total_expense
+  FROM (
+    SELECT 'revenue' AS table_name, amount, created_at FROM revenue
+    UNION ALL
+    SELECT 'expense' AS table_name, amount, created_at FROM expense
+  ) AS combined
+  GROUP BY year, month_number, month
+  ORDER BY year, month_number
+`;
+ connection.query(totalRevenueQuery, (err, revenueResults) => {
+  if (err) {
+   console.error('Error fetching total revenue:', err);
+      logActivity('ERROR', 'finance', 'Error fetching total revenue', 'System');
+      return res.status(500).json({ error: 'Failed to fetch finance stats' });
     }
-    if (year) {
-      filters.push(`YEAR(created_at) = ${mysql.escape(year)}`);
-    }
-  
-    if (filters.length > 0) {
-      const whereClause = ` WHERE ${filters.join(' AND ')}`;
-      totalRevenueQuery += whereClause;
-      totalExpenseQuery += whereClause;
-    }
-  
-    connection.query(
-      `${totalRevenueQuery}; ${totalExpenseQuery}; ${graphQuery}`,
-      (err, results) => {
-        if (err) {
-          console.error('Error fetching finance stats:', err);
-          logActivity('ERROR', 'finance', 'Error fetching finance stats', 'System');
+  connection.query(totalExpenseQuery, (err, expenseResults) => {
+    if (err) {
+      console.error('Error fetching total expense:', err);
+        logActivity('ERROR', 'finance', 'Error fetching total expense', 'System');
+        return res.status(500).json({ error: 'Failed to fetch finance stats' });
+      }
+    connection.query(graphQuery, (err, graphResults) => {
+      if (err) {
+        console.error('Error fetching graph data:', err);
+          logActivity('ERROR', 'finance', 'Error fetching graph data', 'System');
           return res.status(500).json({ error: 'Failed to fetch finance stats' });
         }
-  
-        const totalRevenue = results[0][0].total_revenue || 0;
-        const totalExpense = results[1][0].total_expense || 0;
-        const graphData = results[2];
-  
+      try {
+        const totalRevenue = (revenueResults[0] && revenueResults[0].total_revenue) || 0;
+        const totalExpense = (expenseResults[0] && expenseResults[0].total_expense) || 0;
         const netProfit = totalRevenue - totalExpense;
-
         logActivity('READ', 'finance', 'Fetched finance stats', 'Admin');
-        res.status(200).json({
-          total_revenue: totalRevenue,
-          total_expense: totalExpense,
-          net_profit: netProfit,
-          graph_data: graphData,
-        });
+          res.status(200).json({
+            total_revenue: totalRevenue,
+            total_expense: totalExpense,
+            net_profit: netProfit,
+            graph_data: graphResults,
+          });
+      } catch (e) {
+        console.error('Error processing finance stats:', e);
+        res.status(500).json({ error: 'Failed to process finance stats' });
       }
-    );
+    });
   });
+});
+});
 
 
 
@@ -4208,7 +4218,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**
  * @swagger
- * https://qodebyte-mgt.onrender.com/recent_activity:
+ * /recent_activity:
  *   get:
  *     summary: Fetch all recent activities
  *     description: Retrieve a list of all recent activities with optional filters for month and year.
@@ -4302,7 +4312,7 @@ app.delete('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/recent_activity/{activityId}:
+ * /recent_activity/{activityId}:
  *   get:
  *     summary: Get a recent activity record by ID
  *     description: Fetch a recent activity record by its ID
@@ -4391,7 +4401,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/recent_activity/{activityId}:
+   * /recent_activity/{activityId}:
    *   delete:
    *     summary: Delete a recent activity record
    *     description: Delete a recent activity record by its ID
@@ -4458,7 +4468,7 @@ app.delete('/project/:projectId', (req, res) => {
 
   /**
    * @swagger
-   * https://qodebyte-mgt.onrender.com/:
+   * /:
    *   get:
    *     summary: Welcome message
    *     description: Returns a welcome message for the API
