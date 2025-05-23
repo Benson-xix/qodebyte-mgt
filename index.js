@@ -2714,6 +2714,138 @@ app.patch('/staffs/:staffId', (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /staff-stats:
+ *   get:
+ *     summary: Get comprehensive staff statistics
+ *     description: Retrieve detailed statistics about staff including gender distribution, status breakdown, and performance metrics.
+ *     responses:
+ *       200:
+ *         description: Staff statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 gender_stats:
+ *                   type: object
+ *                   properties:
+ *                     male:
+ *                       type: integer
+ *                       description: Number of male staff
+ *                       example: 10
+ *                     female:
+ *                       type: integer
+ *                       description: Number of female staff
+ *                       example: 8
+ *                 status_stats:
+ *                   type: object
+ *                   properties:
+ *                     active:
+ *                       type: integer
+ *                       description: Number of active staff (status 0)
+ *                       example: 12
+ *                     on_leave:
+ *                       type: integer
+ *                       description: Number of staff on leave (status 1)
+ *                       example: 3
+ *                     terminated:
+ *                       type: integer
+ *                       description: Number of terminated staff (status 2)
+ *                       example: 3
+ *                 performance_stats:
+ *                   type: object
+ *                   properties:
+ *                     avg_check_in:
+ *                       type: number
+ *                       format: float
+ *                       description: Average check-in percentage
+ *                       example: 85.5
+ *                     avg_project_completion:
+ *                       type: number
+ *                       format: float
+ *                       description: Average project completion percentage
+ *                       example: 72.3
+ *                 total_staff:
+ *                   type: integer
+ *                   description: Total number of staff
+ *                   example: 18
+ *                 project_stats:
+ *                   type: object
+ *                   properties:
+ *                     ongoing:
+ *                       type: integer
+ *                       description: Total ongoing projects across all staff
+ *                       example: 24
+ *                     overdue:
+ *                       type: integer
+ *                       description: Total overdue projects across all staff
+ *                       example: 5
+ *       500:
+ *         description: Failed to fetch staff statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Failed to fetch staff statistics
+ */
+app.get('/staff-stats', async (req, res) => {
+  try {
+
+    const statsQuery = `
+      SELECT 
+        SUM(gender = 'male') AS male_count,
+        SUM(gender = 'female') AS female_count,
+        SUM(staff_status = 0) AS active_count,
+        SUM(staff_status = 1) AS on_leave_count,
+        SUM(staff_status = 2) AS terminated_count,
+        COUNT(*) AS total_staff,
+        AVG(check_in_percentage) AS avg_check_in,
+        AVG(project_completion_status) AS avg_project_completion,
+        SUM(ongoing_project_no) AS total_ongoing_projects,
+        SUM(overdue_project_no) AS total_overdue_projects
+      FROM staffs
+    `;
+
+    
+    const [results] = await connection.promise().query(statsQuery);
+
+   
+    const response = {
+      gender_stats: {
+        male: results.male_count || 0,
+        female: results.female_count || 0
+      },
+      status_stats: {
+        active: results.active_count || 0,
+        on_leave: results.on_leave_count || 0,
+        terminated: results.terminated_count || 0
+      },
+      performance_stats: {
+        avg_check_in: results.avg_check_in ? parseFloat(results.avg_check_in).toFixed(2) : 0,
+        avg_project_completion: results.avg_project_completion ? parseFloat(results.avg_project_completion).toFixed(2) : 0
+      },
+      total_staff: results.total_staff || 0,
+      project_stats: {
+        ongoing: results.total_ongoing_projects || 0,
+        overdue: results.total_overdue_projects || 0
+      }
+    };
+
+    logActivity('READ', 'staffs', 'Fetched comprehensive staff statistics', 'Admin');
+    res.status(200).json(response);
+  } catch (err) {
+    console.error('Error fetching staff statistics:', err);
+    logActivity('ERROR', 'staffs', 'Error fetching staff statistics', 'System');
+    res.status(500).json({ error: 'Failed to fetch staff statistics' });
+  }
+});
+
   /**   
    * @swagger
    * /upload_document/{staffId}:
