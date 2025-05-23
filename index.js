@@ -1983,41 +1983,58 @@ app.delete('/project/:projectId', (req, res) => {
    */
 
   app.get('/project-stats', (req, res) => {
-    const totalProjectsQuery = 'SELECT COUNT(*) AS total_projects FROM project';
-    const completedProjectsQuery = 'SELECT COUNT(*) AS completed_projects FROM project WHERE status = "completed"';
-    const ongoingProjectsQuery = `
-      SELECT COUNT(*) AS ongoing_projects 
-      FROM project 
-      WHERE status = "ongoing" AND start_date <= CURDATE() AND end_date >= CURDATE()
-    `;
-    const overdueProjectsQuery = `
-      SELECT COUNT(*) AS overdue_projects 
-      FROM project 
-      WHERE status = "overdue" AND end_date < CURDATE()
-    `;
-  
-    connection.query(
-      `${totalProjectsQuery}; ${completedProjectsQuery}; ${ongoingProjectsQuery}; ${overdueProjectsQuery}`,
-      (err, results) => {
+  const totalProjectsQuery = 'SELECT COUNT(*) AS total_projects FROM project';
+  const completedProjectsQuery = 'SELECT COUNT(*) AS completed_projects FROM project WHERE status = "completed"';
+  const ongoingProjectsQuery = `
+    SELECT COUNT(*) AS ongoing_projects 
+    FROM project 
+    WHERE status = "ongoing" AND start_date <= CURDATE() AND end_date >= CURDATE()
+  `;
+  const overdueProjectsQuery = `
+    SELECT COUNT(*) AS overdue_projects 
+    FROM project 
+    WHERE status = "overdue" AND end_date < CURDATE()
+  `;
+
+  connection.query(totalProjectsQuery, (err, totalResults) => {
+    if (err) {
+      console.error('Error fetching total projects:', err);
+      logActivity('ERROR', 'project', 'Error fetching total projects', 'System');
+      return res.status(500).json({ error: 'Failed to fetch project stats' });
+    }
+    connection.query(completedProjectsQuery, (err, completedResults) => {
+      if (err) {
+        console.error('Error fetching completed projects:', err);
+        logActivity('ERROR', 'project', 'Error fetching completed projects', 'System');
+        return res.status(500).json({ error: 'Failed to fetch project stats' });
+      }
+      connection.query(ongoingProjectsQuery, (err, ongoingResults) => {
         if (err) {
-          console.error('Error fetching project stats:', err);
-          logActivity('ERROR', 'project', 'Error fetching project stats', 'System');
+          console.error('Error fetching ongoing projects:', err);
+          logActivity('ERROR', 'project', 'Error fetching ongoing projects', 'System');
           return res.status(500).json({ error: 'Failed to fetch project stats' });
         }
-  
-        const stats = {
-          total_projects: results[0][0].total_projects,
-          completed_projects: results[1][0].completed_projects,
-          ongoing_projects: results[2][0].ongoing_projects,
-          overdue_projects: results[3][0].overdue_projects,
-        };
+        connection.query(overdueProjectsQuery, (err, overdueResults) => {
+          if (err) {
+            console.error('Error fetching overdue projects:', err);
+            logActivity('ERROR', 'project', 'Error fetching overdue projects', 'System');
+            return res.status(500).json({ error: 'Failed to fetch project stats' });
+          }
 
-        logActivity('READ', 'project', 'Fetched project stats', 'Admin');
-  
-        res.status(200).json(stats);
-      }
-    );
+          const stats = {
+            total_projects: totalResults[0].total_projects,
+            completed_projects: completedResults[0].completed_projects,
+            ongoing_projects: ongoingResults[0].ongoing_projects,
+            overdue_projects: overdueResults[0].overdue_projects,
+          };
+
+          logActivity('READ', 'project', 'Fetched project stats', 'Admin');
+          res.status(200).json(stats);
+        });
+      });
+    });
   });
+});
 
 
   cron.schedule('0 0 * * *', () => {
