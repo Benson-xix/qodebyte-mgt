@@ -124,7 +124,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/register-admin:
+ * /register-admin:
  *   post:
  *     summary: Register a new admin
  *     description: Register a new admin account with email, username, and password
@@ -264,7 +264,7 @@ app.use(
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/verify-otp:
+ * /verify-otp:
  *   post:
  *     summary: Verify OTP for admin registration
  *     description: Verify the OTP sent to the admin's email during registration
@@ -368,7 +368,7 @@ app.use(
 
 /**
  * @swagger 
- * https://qodebyte-mgt.onrender.com/admin_login:
+ * /admin_login:
  *   post:
  *     summary: Admin login
  *     description: Login for admin users
@@ -498,7 +498,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/verify-login-otp:
+   * /verify-login-otp:
    *   post:
    *     summary: Verify OTP for login
    *     description: Verify the OTP sent to the user's email for login
@@ -582,7 +582,7 @@ app.use(
   
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/admin:
+ * /admin:
  *   get:
  *     summary: Get all admin accounts
  *     description: Retrieve a list of all admin accounts
@@ -641,7 +641,7 @@ app.use(
 
   /**
    * @swagger
-   * https://qodebyte-mgt.onrender.com/admin/{email}:
+   * /admin/{email}:
    *   get:
    *     summary: Get an admin account by email
    *     description: Retrieve an admin account by its email
@@ -723,7 +723,7 @@ app.use(
 
   /** 
    * @swagger
-   * https://qodebyte-mgt.onrender.com/admin/{adminId}:
+   * /admin/{adminId}:
    *   get:
    *     summary: Get an admin account by ID
    *     description: Retrieve an admin account by its ID
