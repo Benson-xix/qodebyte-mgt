@@ -1363,7 +1363,7 @@ app.use(
    *                   type: string
    *                   description: Success message
    *                   example: Project created successfully
-   *                 projectId:
+   *                 :
    *                   type: integer
    *                   description: ID of the created project
    *                   example: 1
@@ -1671,7 +1671,7 @@ app.get('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * /project/{projectId}:
+ * https://qodebyte-mgt.onrender.com/project/{projectId}:
  *   patch:
  *     summary: Update a project
  *     description: Update the details of a project by its ID
@@ -1729,6 +1729,9 @@ app.get('/project/:projectId', (req, res) => {
  *               status:
  *                 type: string
  *                 description: Status of the project
+ *               project_link:
+ *                  type: string
+ *                  description: Link to the project
  *     responses:
  *       200:
  *         description: Project updated successfully
@@ -1790,7 +1793,8 @@ app.get('/project/:projectId', (req, res) => {
       category,
       cl_Name,
       cl_phone,
-      status
+      status,
+      project_link
     } = req.body;
   
     const updateFields = [];
@@ -1844,6 +1848,10 @@ app.get('/project/:projectId', (req, res) => {
       updateFields.push('status = ?');
       updateValues.push(status);
     }
+     if (project_link) {
+    updateFields.push('project_link = ?');
+    updateValues.push(project_link);
+  }
   
     if (updateFields.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
@@ -1867,7 +1875,6 @@ app.get('/project/:projectId', (req, res) => {
     res.status(200).json({ message: 'Project updated successfully' });
   });
 });
-
 
   /** 
    * @swagger
