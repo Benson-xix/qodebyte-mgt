@@ -1441,9 +1441,28 @@ app.use(
         return res.status(500).json({ error: 'Failed to create project' });
       }
   
-      logActivity('INSERT', 'project', `Created project: ${project_name} with ID ${result.insertId}`, 'Admin');
-      res.status(201).json({ message: 'Project created successfully', projectId: result.insertId });
-    });
+     
+      const projectId = result.insertId;
+  
+    if (Array.isArray(assigned_staff) && assigned_staff.length > 0) {
+      const staffValues = assigned_staff.map(staffId => [projectId, staffId]);
+      const staffQuery = 'INSERT INTO project_staff (project_id, staff_id) VALUES ?';
+      connection.query(staffQuery, [staffValues], (staffErr) => {
+        if (staffErr) {
+          logActivity('ERROR', 'project_staff', `Error assigning staff to project ${projectId}`, 'Admin');
+          return res.status(201).json({ 
+            message: 'Project created, but failed to assign some staff', 
+            projectId 
+          });
+        }
+        logActivity('INSERT', 'project_staff', `Assigned staff to project ${projectId}`, 'Admin');
+        res.status(201).json({ message: 'Project created successfully', projectId });
+      });
+    } else {
+      logActivity('INSERT', 'project', `Created project: ${project_name} with ID ${projectId}`, 'Admin');
+      res.status(201).json({ message: 'Project created successfully', projectId });
+    }
+  });
 });
 
 
@@ -1671,7 +1690,7 @@ app.get('/project/:projectId', (req, res) => {
 
 /** 
  * @swagger
- * https://qodebyte-mgt.onrender.com/project/{projectId}:
+ * /project/{projectId}:
  *   patch:
  *     summary: Update a project
  *     description: Update the details of a project by its ID
@@ -1871,10 +1890,38 @@ app.get('/project/:projectId', (req, res) => {
       return res.status(404).json({ error: 'Project not found' });
     }
 
-    logActivity('UPDATE', 'project', `Updated project with ID ${projectId}`, 'Admin');
-    res.status(200).json({ message: 'Project updated successfully' });
+   if (assigned_staff && Array.isArray(assigned_staff)) {
+     
+      const deleteQuery = 'DELETE FROM project_staff WHERE project_id = ?';
+      connection.query(deleteQuery, [projectId], (delErr) => {
+        if (delErr) {
+          logActivity('ERROR', 'project_staff', `Error clearing staff assignments for project ${projectId}`, 'Admin');
+          return res.status(500).json({ error: 'Failed to update staff assignments' });
+        }
+      
+        if (assigned_staff.length > 0) {
+          const staffValues = assigned_staff.map(staffId => [projectId, staffId]);
+          const insertQuery = 'INSERT INTO project_staff (project_id, staff_id) VALUES ?';
+          connection.query(insertQuery, [staffValues], (insErr) => {
+            if (insErr) {
+              logActivity('ERROR', 'project_staff', `Error assigning staff to project ${projectId}`, 'Admin');
+              return res.status(500).json({ error: 'Failed to assign staff to project' });
+            }
+            logActivity('UPDATE', 'project_staff', `Updated staff assignments for project ${projectId}`, 'Admin');
+            res.status(200).json({ message: 'Project updated successfully' });
+          });
+        } else {
+          logActivity('UPDATE', 'project_staff', `Cleared all staff assignments for project ${projectId}`, 'Admin');
+          res.status(200).json({ message: 'Project updated successfully' });
+        }
+      });
+    } else {
+      logActivity('UPDATE', 'project', `Updated project with ID ${projectId}`, 'Admin');
+      res.status(200).json({ message: 'Project updated successfully' });
+    }
   });
 });
+
 
   /** 
    * @swagger
@@ -2041,6 +2088,453 @@ app.delete('/project/:projectId', (req, res) => {
       });
     });
   });
+});
+
+
+/**
+ * @swagger
+ * /project/{projectId}/assign-staff:
+ *   post:
+ *     summary: Assign staff to a project
+ *     description: Assign one or more staff members to a specific project.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               staffIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: Array of staff IDs to assign
+ *                 example: [1, 2, 3]
+ *     responses:
+ *       201:
+ *         description: Staff assigned to project successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff assigned to project successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: staffIds must be a non-empty array
+ *       500:
+ *         description: Failed to assign staff to project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to assign staff to project
+ */
+app.post('/project/:projectId/assign-staff', (req, res) => {
+  const { projectId } = req.params;
+  const { staffIds } = req.body; 
+
+  if (!Array.isArray(staffIds) || staffIds.length === 0) {
+    return res.status(400).json({ error: 'staffIds must be a non-empty array' });
+  }
+
+  const values = staffIds.map(staffId => [projectId, staffId]);
+  const query = 'INSERT INTO project_staff (project_id, staff_id) VALUES ?';
+
+  connection.query(query, [values], (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'project_staff', `Error assigning staff to project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to assign staff to project' });
+    }
+    logActivity('INSERT', 'project_staff', `Assigned staff to project ${projectId}`, 'Admin');
+    res.status(201).json({ message: 'Staff assigned to project successfully' });
+  });
+});
+
+
+/**
+ * @swagger
+ * /staffs/{staffId}/projects:
+ *   get:
+ *     summary: Get all projects assigned to a specific staff member
+ *     description: Retrieve all projects that a particular staff member is assigned to.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     responses:
+ *       200:
+ *         description: A list of projects assigned to the staff member
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   project_name:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   start_date:
+ *                     type: string
+ *                     format: date
+ *                   end_date:
+ *                     type: string
+ *                     format: date
+ *                   assigned_staff:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   project_manager:
+ *                     type: string
+ *                   project_budget:
+ *                     type: number
+ *                   priority:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                   client_name:
+ *                     type: string
+ *                   client_phone:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Failed to fetch projects for staff
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch projects for staff
+ */
+app.get('/staffs/:staffId/projects', (req, res) => {
+  const { staffId } = req.params;
+  const query = `
+    SELECT p.* FROM project p
+    JOIN project_staff ps ON p.id = ps.project_id
+    WHERE ps.staff_id = ?
+    ORDER BY p.created_at DESC
+  `;
+  connection.query(query, [staffId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'project_staff', `Error fetching projects for staff ${staffId}`, 'System');
+      return res.status(500).json({ error: 'Failed to fetch projects for staff' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+/**
+ * @swagger
+ * /staffs/{staffId}/projects:
+ *   get:
+ *     summary: Get all projects assigned to a specific staff member
+ *     description: Retrieve all projects that a particular staff member is assigned to.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     responses:
+ *       200:
+ *         description: A list of projects assigned to the staff member
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   project_name:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   start_date:
+ *                     type: string
+ *                     format: date
+ *                   end_date:
+ *                     type: string
+ *                     format: date
+ *                   assigned_staff:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                   project_manager:
+ *                     type: string
+ *                   project_budget:
+ *                     type: number
+ *                   priority:
+ *                     type: string
+ *                   category:
+ *                     type: string
+ *                   client_name:
+ *                     type: string
+ *                   client_phone:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *       500:
+ *         description: Failed to fetch projects for staff
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch projects for staff
+ */
+app.get('/project/:projectId/staffs', (req, res) => {
+  const { projectId } = req.params;
+  const query = `
+    SELECT s.* FROM staffs s
+    JOIN project_staff ps ON s.id = ps.staff_id
+    WHERE ps.project_id = ?
+    ORDER BY s.first_name
+  `;
+  connection.query(query, [projectId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'project_staff', `Error fetching staff for project ${projectId}`, 'System');
+      return res.status(500).json({ error: 'Failed to fetch staff for project' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+
+
+function updateStaffProjectStats(staffId) {
+  // Count all projects assigned
+  const allProjectsQuery = `
+    SELECT COUNT(*) AS all_projects
+    FROM project_staff
+    WHERE staff_id = ?
+  `;
+  // Count ongoing projects
+  const ongoingQuery = `
+    SELECT COUNT(*) AS ongoing_project_no
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'ongoing'
+  `;
+  // Count overdue projects
+  const overdueQuery = `
+    SELECT COUNT(*) AS overdue_project_no
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'overdue'
+  `;
+  // Count completed projects
+  const completedQuery = `
+    SELECT COUNT(*) AS completed_projects
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'completed'
+  `;
+
+  connection.query(allProjectsQuery, [staffId], (err, allRes) => {
+    if (err) return;
+    const allProjects = allRes[0].all_projects || 0;
+
+    connection.query(ongoingQuery, [staffId], (err, ongoingRes) => {
+      if (err) return;
+      connection.query(overdueQuery, [staffId], (err, overdueRes) => {
+        if (err) return;
+        connection.query(completedQuery, [staffId], (err, completedRes) => {
+          if (err) return;
+          const completedProjects = completedRes[0].completed_projects || 0;
+          // Calculate completion status as a percentage
+          const projectCompletionStatus = allProjects > 0
+            ? parseFloat(((completedProjects / allProjects) * 100).toFixed(2))
+            : 0;
+
+          const updateQuery = `
+            UPDATE staffs SET
+              all_projects = ?,
+              ongoing_project_no = ?,
+              overdue_project_no = ?,
+              project_completion_status = ?
+            WHERE id = ?
+          `;
+          connection.query(
+            updateQuery,
+            [
+              allProjects,
+              ongoingRes[0].ongoing_project_no,
+              overdueRes[0].overdue_project_no,
+              projectCompletionStatus,
+              staffId
+            ]
+          );
+        });
+      });
+    });
+  });
+}
+
+/**
+ * @swagger
+ * /project/{projectId}/staff/{staffId}/completion:
+ *   patch:
+ *     summary: Update a staff member's completion status for a project
+ *     description: Update the completion percentage for a staff member on a specific project.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               completion_status:
+ *                 type: number
+ *                 format: float
+ *                 description: Completion percentage (0.00 to 100.00)
+ *                 example: 75.5
+ *     responses:
+ *       200:
+ *         description: Completion status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Completion status updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Completion status must be a number between 0 and 100
+ *       404:
+ *         description: Assignment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Assignment not found
+ *       500:
+ *         description: Failed to update completion status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to update completion status
+ */
+app.patch('/project/:projectId/staff/:staffId/completion', (req, res) => {
+  const { projectId, staffId } = req.params;
+  const { completion_status } = req.body;
+
+  if (
+    typeof completion_status !== 'number' ||
+    completion_status < 0 ||
+    completion_status > 100
+  ) {
+    return res.status(400).json({ error: 'Completion status must be a number between 0 and 100' });
+  }
+
+  const query = `
+    UPDATE project_staff
+    SET completion_status = ?
+    WHERE project_id = ? AND staff_id = ?
+  `;
+
+  connection.query(query, [completion_status, projectId, staffId], (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'project_staff', `Error updating completion status for staff ${staffId} on project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to update completion status' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'project_staff', `Assignment not found for staff ${staffId} on project ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Assignment not found' });
+    }
+
+    logActivity('UPDATE', 'project_staff', `Updated completion status for staff ${staffId} on project ${projectId}`, 'Admin');
+    res.status(200).json({ message: 'Completion status updated successfully' });
+  });
+});
+
+function updateAllStaffProjectStats() {
+  const getAllStaffIdsQuery = 'SELECT id FROM staffs';
+  connection.query(getAllStaffIdsQuery, (err, staffResults) => {
+    if (err) {
+      console.error('Error fetching staff IDs for stats update:', err);
+      return;
+    }
+    staffResults.forEach(staff => {
+      updateStaffProjectStats(staff.id);
+    });
+  });
+}
+
+
+cron.schedule('0 0 * * *', () => {
+  console.log('Running daily staff project stats update...');
+  updateAllStaffProjectStats();
+  logActivity('CRON_JOB', 'staffs', 'Updated all staff project stats', 'System (Cron Job)');
 });
 
 
