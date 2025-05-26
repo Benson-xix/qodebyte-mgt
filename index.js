@@ -5263,6 +5263,109 @@ app.delete('/project/:projectId/revenue/:revenueId', (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /project-finance/{projectId}:
+ *   get:
+ *     summary: Get project finance summary
+ *     description: Retrieve the project budget, total revenue, total expenses, and net profit for a specific project.
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     responses:
+ *       200:
+ *         description: Project finance summary retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 project_budget:
+ *                   type: number
+ *                   description: Budget of the project
+ *                   example: 50000
+ *                 project_revenue:
+ *                   type: number
+ *                   description: Total revenue for the project
+ *                   example: 20000
+ *                 project_expenses:
+ *                   type: number
+ *                   description: Total expenses for the project
+ *                   example: 15000
+ *                 project_net_profit:
+ *                   type: number
+ *                   description: Net profit (revenue - expenses)
+ *                   example: 5000
+ *       404:
+ *         description: Project not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Project not found
+ *       500:
+ *         description: Failed to fetch project finance summary
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch project finance summary
+ */
+app.get('/project-finance/:projectId', (req, res) => {
+  const { projectId } = req.params;
+
+  const projectQuery = 'SELECT project_budget FROM project WHERE id = ?';
+  const revenueQuery = 'SELECT SUM(amount) AS project_revenue FROM revenue WHERE project_id = ?';
+  const expenseQuery = 'SELECT SUM(amount) AS project_expenses FROM expense WHERE project_id = ?';
+
+  connection.query(projectQuery, [projectId], (err, projectResults) => {
+    if (err) {
+      logActivity('ERROR', 'project', `Error fetching project budget for ID ${projectId}`, 'System');
+      return res.status(500).json({ error: 'Failed to fetch project finance summary' });
+    }
+    if (projectResults.length === 0) {
+      logActivity('FAILED', 'project', `Project not found with ID ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    const project_budget = projectResults[0].project_budget || 0;
+
+    connection.query(revenueQuery, [projectId], (err, revenueResults) => {
+      if (err) {
+        logActivity('ERROR', 'revenue', `Error fetching revenue for project ID ${projectId}`, 'System');
+        return res.status(500).json({ error: 'Failed to fetch project finance summary' });
+      }
+      const project_revenue = revenueResults[0].project_revenue || 0;
+
+      connection.query(expenseQuery, [projectId], (err, expenseResults) => {
+        if (err) {
+          logActivity('ERROR', 'expense', `Error fetching expenses for project ID ${projectId}`, 'System');
+          return res.status(500).json({ error: 'Failed to fetch project finance summary' });
+        }
+        const project_expenses = expenseResults[0].project_expenses || 0;
+        const project_net_profit = project_revenue - project_expenses;
+
+        logActivity('READ', 'project', `Fetched finance summary for project ID ${projectId}`, 'Admin');
+        res.status(200).json({
+          project_budget,
+          project_revenue,
+          project_expenses,
+          project_net_profit
+        });
+      });
+    });
+  });
+});
+
 
   function logActivity(activityType, tableName, description, performedBy = 'System') {
     const query = `
