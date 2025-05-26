@@ -4495,6 +4495,773 @@ const graphQuery = `
 });
 
 
+/**
+ * @swagger
+ * /project/{projectId}/expense:
+ *   post:
+ *     summary: Create a new expense for a project
+ *     description: Create a new expense record associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Amount of the expense
+ *                 example: 250.00
+ *               expense_category:
+ *                 type: string
+ *                 description: Category of the expense
+ *                 example: Materials
+ *               description:
+ *                 type: string
+ *                 description: Description of the expense
+ *                 example: Purchased building materials
+ *     responses:
+ *       201:
+ *         description: Expense created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Expense created successfully
+ *                 expenseId:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Amount, Expense Category, and Description are required
+ *       500:
+ *         description: Failed to create expense
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to create expense
+ */
+app.post('/project/:projectId/expense', (req, res) => {
+  const { projectId } = req.params;
+  const { amount, expense_category, description } = req.body;
+  if (!amount || !expense_category || !description) {
+    return res.status(400).json({ error: 'Amount, Expense Category, and Description are required' });
+  }
+  const query = `
+    INSERT INTO expense (expense_description, amount, expense_category, project_id) 
+    VALUES (?, ?, ?, ?)
+  `;
+  const values = [description, amount, expense_category, projectId];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error creating expense for project ${projectId}: ${description}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to create expense' });
+    }
+    logActivity('INSERT', 'expense', `Created expense for project ${projectId} with ID ${result.insertId}`, 'Admin');
+    res.status(201).json({ message: 'Expense created successfully', expenseId: result.insertId });
+  });
+});
+
+/**
+ * @swagger
+ * /project/{projectId}/expense/{expenseId}:
+ *   patch:
+ *     summary: Update an expense for a project
+ *     description: Update an existing expense record associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *       - in: path
+ *         name: expenseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the expense to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Amount of the expense
+ *                 example: 250.00
+ *               expense_category:
+ *                 type: string
+ *                 description: Category of the expense
+ *                 example: Materials
+ *               description:
+ *                 type: string
+ *                 description: Description of the expense
+ *                 example: Purchased building materials
+ *               status:
+ *                 type: string
+ *                 description: Status of the expense
+ *                 example: Approved
+ *     responses:
+ *       200:
+ *         description: Expense updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Expense updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No fields to update
+ *       404:
+ *         description: Expense not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Expense not found
+ *       500:
+ *         description: Failed to update expense
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to update expense
+ */
+app.patch('/project/:projectId/expense/:expenseId', (req, res) => {
+  const { projectId, expenseId } = req.params;
+  const { amount, expense_category, description, status } = req.body;
+
+  const updateFields = [];
+  const updateValues = [];
+
+  if (amount) {
+    updateFields.push('amount = ?');
+    updateValues.push(amount);
+  }
+  if (expense_category) {
+    updateFields.push('expense_category = ?');
+    updateValues.push(expense_category);
+  }
+  if (description) {
+    updateFields.push('expense_description = ?');
+    updateValues.push(description);
+  }
+  if (status) {
+    updateFields.push('status = ?');
+    updateValues.push(status);
+  }
+
+  if (updateFields.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+
+  const query = `UPDATE expense SET ${updateFields.join(', ')} WHERE id = ? AND project_id = ?`;
+  updateValues.push(expenseId, projectId);
+
+  connection.query(query, updateValues, (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error updating expense with ID ${expenseId} for project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to update expense' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'expense', `Expense not found with ID ${expenseId} for project ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Expense not found' });
+    }
+
+    logActivity('UPDATE', 'expense', `Updated expense with ID ${expenseId} for project ${projectId}`, 'Admin');
+    res.status(200).json({ message: 'Expense updated successfully' });
+  });
+});
+
+/**
+ * @swagger
+ * /project/{projectId}/expenses:
+ *   get:
+ *     summary: Get all expenses for a project
+ *     description: Retrieve all expense records associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     responses:
+ *       200:
+ *         description: A list of expenses for the project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Expense ID
+ *                     example: 1
+ *                   expense_description:
+ *                     type: string
+ *                     description: Description of the expense
+ *                     example: Purchased building materials
+ *                   amount:
+ *                     type: number
+ *                     description: Amount of the expense
+ *                     example: 250.00
+ *                   expense_category:
+ *                     type: string
+ *                     description: Category of the expense
+ *                     example: Materials
+ *                   status:
+ *                     type: string
+ *                     description: Status of the expense
+ *                     example: Approved
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Timestamp of when the expense was created
+ *                     example: 2023-10-01T12:00:00Z
+ *                   project_id:
+ *                     type: integer
+ *                     description: ID of the project
+ *                     example: 123
+ *       404:
+ *         description: No expenses found for the project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: No expenses found for this project
+ *       500:
+ *         description: Failed to fetch expenses
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *                   example: Failed to fetch expenses
+ */
+app.get('/project/:projectId/expenses', (req, res) => {
+  const { projectId } = req.params;
+  const query = 'SELECT * FROM expense WHERE project_id = ? ORDER BY created_at DESC';
+
+  connection.query(query, [projectId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error fetching expenses for project ${projectId}`, 'System');
+      return res.status(500).json({ error: 'Failed to fetch expenses' });
+    }
+    logActivity('READ', 'expense', `Fetched all expenses for project ${projectId}`, 'Admin');
+    res.status(200).json(results);
+  });
+});
+
+
+/**
+ * @swagger
+ * /project/{projectId}/expense/{expenseId}:
+ *   delete:
+ *     summary: Delete an expense for a project
+ *     description: Delete an expense record associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *       - in: path
+ *         name: expenseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the expense to delete
+ *     responses:
+ *       200:
+ *         description: Expense deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Expense deleted successfully
+ *       404:
+ *         description: Expense not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Expense not found
+ *       500:
+ *         description: Failed to delete expense
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to delete expense
+ */
+app.delete('/project/:projectId/expense/:expenseId', (req, res) => {
+  const { projectId, expenseId } = req.params;
+  const query = 'DELETE FROM expense WHERE id = ? AND project_id = ?';
+
+  connection.query(query, [expenseId, projectId], (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error deleting expense with ID ${expenseId} for project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to delete expense' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'expense', `Expense not found with ID ${expenseId} for project ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Expense not found' });
+    }
+
+    logActivity('DELETE', 'expense', `Deleted expense with ID ${expenseId} for project ${projectId}`, 'Admin');
+    res.status(200).json({ message: 'Expense deleted successfully' });
+  });
+});
+
+/**
+ * @swagger
+ * /project/{projectId}/revenue:
+ *   post:
+ *     summary: Create a new revenue for a project
+ *     description: Create a new revenue record associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               customer_name:
+ *                 type: string
+ *                 description: Name of the customer
+ *                 example: John Doe
+ *               service_type:
+ *                 type: string
+ *                 description: Type of service provided
+ *                 example: Consulting
+ *               amount:
+ *                 type: number
+ *                 description: Amount of revenue
+ *                 example: 1000.00
+ *               revenue_description:
+ *                 type: string
+ *                 description: Description of the revenue
+ *                 example: Monthly consulting fee
+ *               method_of_payment:
+ *                 type: string
+ *                 description: Method of payment
+ *                 example: Credit Card
+ *     responses:
+ *       201:
+ *         description: Revenue created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Revenue created successfully
+ *                 revenueId:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Customer Name, Service Type, Amount, and Method of Payment are required
+ *       500:
+ *         description: Failed to create revenue
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to create revenue
+ */
+app.post('/project/:projectId/revenue', (req, res) => {
+  const { projectId } = req.params;
+  const { customer_name, service_type, amount, revenue_description, method_of_payment } = req.body;
+  if (!customer_name || !service_type || !amount || !method_of_payment) {
+    return res.status(400).json({ error: 'Customer Name, Service Type, Amount, and Method of Payment are required' });
+  }
+  const query = `
+    INSERT INTO revenue (customer_name, service_type, amount, revenue_description, method_of_payment, project_id) 
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  const values = [customer_name, service_type, amount, revenue_description, method_of_payment, projectId];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'revenue', `Error creating revenue for project ${projectId}: ${revenue_description}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to create revenue' });
+    }
+    logActivity('INSERT', 'revenue', `Created revenue for project ${projectId} with ID ${result.insertId}`, 'Admin');
+    res.status(201).json({ message: 'Revenue created successfully', revenueId: result.insertId });
+  });
+});
+
+
+/**
+ * @swagger
+ * /project/{projectId}/revenue/{revenueId}:
+ *   patch:
+ *     summary: Update a revenue record for a specific project
+ *     description: Update a revenue record associated with a specific project by its ID
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *       - in: path
+ *         name: revenueId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the revenue record to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               customer_name:
+ *                 type: string
+ *                 description: Name of the customer
+ *               service_type:
+ *                 type: string
+ *                 description: Type of service provided
+ *               amount:
+ *                 type: number
+ *                 description: Amount of revenue
+ *               revenue_description:
+ *                 type: string
+ *                 description: Description of the revenue
+ *               method_of_payment:
+ *                 type: string
+ *                 description: Method of payment
+ *               status:
+ *                 type: string
+ *                 description: Status of the revenue
+ *     responses:
+ *       200:
+ *         description: Revenue updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Revenue updated successfully
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No fields to update
+ *       404:
+ *         description: Revenue not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Revenue not found
+ *       500:
+ *         description: Failed to update revenue
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to update revenue
+ */
+app.patch('/project/:projectId/revenue/:revenueId', (req, res) => {
+  const { projectId, revenueId } = req.params;
+  const { customer_name, service_type, amount, revenue_description, method_of_payment, status } = req.body;
+
+  const updateFields = [];
+  const updateValues = [];
+
+  if (customer_name) {
+    updateFields.push('customer_name = ?');
+    updateValues.push(customer_name);
+  }
+  if (service_type) {
+    updateFields.push('service_type = ?');
+    updateValues.push(service_type);
+  }
+  if (amount) {
+    updateFields.push('amount = ?');
+    updateValues.push(amount);
+  }
+  if (revenue_description) {
+    updateFields.push('revenue_description = ?');
+    updateValues.push(revenue_description);
+  }
+  if (method_of_payment) {
+    updateFields.push('method_of_payment = ?');
+    updateValues.push(method_of_payment);
+  }
+  if (status) {
+    updateFields.push('status = ?');
+    updateValues.push(status);
+  }
+
+  if (updateFields.length === 0) {
+    return res.status(400).json({ error: 'No fields to update' });
+  }
+
+  const query = `UPDATE revenue SET ${updateFields.join(', ')} WHERE id = ? AND project_id = ?`;
+  updateValues.push(revenueId, projectId);
+
+  connection.query(query, updateValues, (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'revenue', `Error updating revenue with ID ${revenueId} for project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to update revenue' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'revenue', `Revenue not found with ID ${revenueId} for project ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Revenue not found' });
+    }
+
+    logActivity('UPDATE', 'revenue', `Updated revenue with ID ${revenueId} for project ${projectId}`, 'Admin');
+    res.status(200).json({ message: 'Revenue updated successfully' });
+  });
+});
+
+/**
+ * @swagger
+ * /project/{projectId}/revenues:
+ *   get:
+ *     summary: Get all revenues for a project
+ *     description: Retrieve all revenue records associated with a specific project
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *     responses:
+ *       200:
+ *         description: A list of revenues for the project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Revenue ID
+ *                   customer_name:
+ *                     type: string
+ *                   service_type:
+ *                     type: string
+ *                   amount:
+ *                     type: number
+ *                   revenue_description:
+ *                     type: string
+ *                   method_of_payment:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   project_id:
+ *                     type: integer
+ *       500:
+ *         description: Failed to fetch revenues
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch revenues
+ *       404:
+ *         description: No revenues found for this project
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No revenues found for this project
+ */
+app.get('/project/:projectId/revenues', (req, res) => {
+  const { projectId } = req.params;
+  const query = 'SELECT * FROM revenue WHERE project_id = ? ORDER BY created_at DESC';
+
+  connection.query(query, [projectId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'revenue', `Error fetching revenues for project ${projectId}`, 'System');
+      return res.status(500).json({ error: 'Failed to fetch revenues' });
+    }
+    logActivity('READ', 'revenue', `Fetched all revenues for project ${projectId}`, 'Admin');
+    res.status(200).json(results);
+  });
+});
+
+
+/**
+ * @swagger
+ * /project/{projectId}/revenue/{revenueId}:
+ *   delete:
+ *     summary: Delete a revenue record for a specific project
+ *     description: Delete a revenue record associated with a specific project by its ID
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the project
+ *       - in: path
+ *         name: revenueId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the revenue record to delete
+ *     responses:
+ *       200:
+ *         description: Revenue deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Revenue deleted successfully
+ *       404:
+ *         description: Revenue not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Revenue not found
+ *       500:
+ *         description: Failed to delete revenue
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to delete revenue
+ */
+app.delete('/project/:projectId/revenue/:revenueId', (req, res) => {
+  const { projectId, revenueId } = req.params;
+  const query = 'DELETE FROM revenue WHERE id = ? AND project_id = ?';
+
+  connection.query(query, [revenueId, projectId], (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'revenue', `Error deleting revenue with ID ${revenueId} for project ${projectId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to delete revenue' });
+    }
+
+    if (result.affectedRows === 0) {
+      logActivity('FAILED', 'revenue', `Revenue not found with ID ${revenueId} for project ${projectId}`, 'Admin');
+      return res.status(404).json({ error: 'Revenue not found' });
+    }
+
+    logActivity('DELETE', 'revenue', `Deleted revenue with ID ${revenueId} for project ${projectId}`, 'Admin');
+    res.status(200).json({ message: 'Revenue deleted successfully' });
+  });
+});
 
 
   function logActivity(activityType, tableName, description, performedBy = 'System') {
