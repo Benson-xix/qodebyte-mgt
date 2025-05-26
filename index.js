@@ -2339,77 +2339,6 @@ app.get('/project/:projectId/staffs', (req, res) => {
   });
 });
 
-
-
-function updateStaffProjectStats(staffId) {
-  // Count all projects assigned
-  const allProjectsQuery = `
-    SELECT COUNT(*) AS all_projects
-    FROM project_staff
-    WHERE staff_id = ?
-  `;
-  // Count ongoing projects
-  const ongoingQuery = `
-    SELECT COUNT(*) AS ongoing_project_no
-    FROM project_staff ps
-    JOIN project p ON ps.project_id = p.id
-    WHERE ps.staff_id = ? AND p.status = 'ongoing'
-  `;
-  // Count overdue projects
-  const overdueQuery = `
-    SELECT COUNT(*) AS overdue_project_no
-    FROM project_staff ps
-    JOIN project p ON ps.project_id = p.id
-    WHERE ps.staff_id = ? AND p.status = 'overdue'
-  `;
-  // Count completed projects
-  const completedQuery = `
-    SELECT COUNT(*) AS completed_projects
-    FROM project_staff ps
-    JOIN project p ON ps.project_id = p.id
-    WHERE ps.staff_id = ? AND p.status = 'completed'
-  `;
-
-  connection.query(allProjectsQuery, [staffId], (err, allRes) => {
-    if (err) return;
-    const allProjects = allRes[0].all_projects || 0;
-
-    connection.query(ongoingQuery, [staffId], (err, ongoingRes) => {
-      if (err) return;
-      connection.query(overdueQuery, [staffId], (err, overdueRes) => {
-        if (err) return;
-        connection.query(completedQuery, [staffId], (err, completedRes) => {
-          if (err) return;
-          const completedProjects = completedRes[0].completed_projects || 0;
-          // Calculate completion status as a percentage
-          const projectCompletionStatus = allProjects > 0
-            ? parseFloat(((completedProjects / allProjects) * 100).toFixed(2))
-            : 0;
-
-          const updateQuery = `
-            UPDATE staffs SET
-              all_projects = ?,
-              ongoing_project_no = ?,
-              overdue_project_no = ?,
-              project_completion_status = ?
-            WHERE id = ?
-          `;
-          connection.query(
-            updateQuery,
-            [
-              allProjects,
-              ongoingRes[0].ongoing_project_no,
-              overdueRes[0].overdue_project_no,
-              projectCompletionStatus,
-              staffId
-            ]
-          );
-        });
-      });
-    });
-  });
-}
-
 /**
  * @swagger
  * /project/{projectId}/staff/{staffId}/completion:
@@ -2516,6 +2445,79 @@ app.patch('/project/:projectId/staff/:staffId/completion', (req, res) => {
     res.status(200).json({ message: 'Completion status updated successfully' });
   });
 });
+
+
+
+function updateStaffProjectStats(staffId) {
+  // Count all projects assigned
+  const allProjectsQuery = `
+    SELECT COUNT(*) AS all_projects
+    FROM project_staff
+    WHERE staff_id = ?
+  `;
+  // Count ongoing projects
+  const ongoingQuery = `
+    SELECT COUNT(*) AS ongoing_project_no
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'ongoing'
+  `;
+  // Count overdue projects
+  const overdueQuery = `
+    SELECT COUNT(*) AS overdue_project_no
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'overdue'
+  `;
+  // Count completed projects
+  const completedQuery = `
+    SELECT COUNT(*) AS completed_projects
+    FROM project_staff ps
+    JOIN project p ON ps.project_id = p.id
+    WHERE ps.staff_id = ? AND p.status = 'completed'
+  `;
+
+  connection.query(allProjectsQuery, [staffId], (err, allRes) => {
+    if (err) return;
+    const allProjects = allRes[0].all_projects || 0;
+
+    connection.query(ongoingQuery, [staffId], (err, ongoingRes) => {
+      if (err) return;
+      connection.query(overdueQuery, [staffId], (err, overdueRes) => {
+        if (err) return;
+        connection.query(completedQuery, [staffId], (err, completedRes) => {
+          if (err) return;
+          const completedProjects = completedRes[0].completed_projects || 0;
+          // Calculate completion status as a percentage
+          const projectCompletionStatus = allProjects > 0
+            ? parseFloat(((completedProjects / allProjects) * 100).toFixed(2))
+            : 0;
+
+          const updateQuery = `
+            UPDATE staffs SET
+              all_projects = ?,
+              ongoing_project_no = ?,
+              overdue_project_no = ?,
+              project_completion_status = ?
+            WHERE id = ?
+          `;
+          connection.query(
+            updateQuery,
+            [
+              allProjects,
+              ongoingRes[0].ongoing_project_no,
+              overdueRes[0].overdue_project_no,
+              projectCompletionStatus,
+              staffId
+            ]
+          );
+        });
+      });
+    });
+  });
+}
+
+
 
 function updateAllStaffProjectStats() {
   const getAllStaffIdsQuery = 'SELECT id FROM staffs';
