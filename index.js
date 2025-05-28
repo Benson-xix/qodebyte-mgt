@@ -3961,6 +3961,299 @@ app.get('/staff-stats', async (req, res) => {
    *                   example: Failed to create expense
    */
 
+/**
+ * @swagger
+ * /staff/{staffId}/payment:
+ *   post:
+ *     summary: Record a staff payment (salary)
+ *     description: Record a salary payment for a specific staff member.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Amount paid to the staff
+ *                 example: 5000
+ *               description:
+ *                 type: string
+ *                 description: Description of the payment
+ *                 example: Monthly salary for June
+ *     responses:
+ *       201:
+ *         description: Staff payment recorded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff payment recorded successfully
+ *                 expenseId:
+ *                   type: integer
+ *                   example: 1
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Amount and Description are required
+ *       500:
+ *         description: Failed to record staff payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to record staff payment
+ */
+
+  app.post('/staff/:staffId/payment', (req, res) => {
+  const { staffId } = req.params;
+  const { amount, description } = req.body;
+  if (!amount || !description) {
+    return res.status(400).json({ error: 'Amount and Description are required' });
+  }
+  const query = `
+    INSERT INTO expense (expense_description, amount, expense_category, staff_id)
+    VALUES (?, ?, 'Salary', ?)
+  `;
+  const values = [description, amount, staffId];
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error recording staff payment for staff ${staffId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to record staff payment' });
+    }
+    logActivity('INSERT', 'expense', `Recorded staff payment for staff ${staffId} with ID ${result.insertId}`, 'Admin');
+    res.status(201).json({ message: 'Staff payment recorded successfully', expenseId: result.insertId });
+  });
+});
+
+/**
+ * @swagger
+ * /staff/{staffId}/payments:
+ *   get:
+ *     summary: Get all salary payments for a staff member
+ *     description: Retrieve all salary payment records for a specific staff member.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     responses:
+ *       200:
+ *         description: A list of salary payments for the staff member
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Expense ID
+ *                   expense_description:
+ *                     type: string
+ *                     description: Description of the payment
+ *                   amount:
+ *                     type: number
+ *                     description: Amount paid
+ *                   expense_category:
+ *                     type: string
+ *                     description: Category of the expense (should be 'Salary')
+ *                   staff_id:
+ *                     type: integer
+ *                     description: Staff ID
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                     description: Payment date
+ *       500:
+ *         description: Failed to fetch staff payments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch staff payments
+ */
+app.get('/staff/:staffId/payments', (req, res) => {
+  const { staffId } = req.params;
+  const query = `
+    SELECT * FROM expense
+    WHERE staff_id = ? AND expense_category = 'Salary'
+    ORDER BY created_at DESC
+  `;
+  connection.query(query, [staffId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error fetching payments for staff ${staffId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to fetch staff payments' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+
+/**
+ * @swagger
+ * /staff/{staffId}/payment-graph:
+ *   get:
+ *     summary: Get monthly salary payment graph for a staff member
+ *     description: Retrieve the total salary paid to a staff member grouped by month and year.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *     responses:
+ *       200:
+ *         description: Monthly salary payment graph data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   year:
+ *                     type: integer
+ *                     description: Year of the payment
+ *                   month_number:
+ *                     type: integer
+ *                     description: Month number (1-12)
+ *                   month:
+ *                     type: string
+ *                     description: Month name
+ *                   total_paid:
+ *                     type: number
+ *                     description: Total salary paid in the month
+ *       500:
+ *         description: Failed to fetch staff payment graph
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to fetch staff payment graph
+ */
+app.get('/staff/:staffId/payment-graph', (req, res) => {
+  const { staffId } = req.params;
+  const query = `
+    SELECT 
+      YEAR(created_at) AS year,
+      MONTH(created_at) AS month_number,
+      MONTHNAME(created_at) AS month,
+      SUM(amount) AS total_paid
+    FROM expense
+    WHERE staff_id = ? AND expense_category = 'Salary'
+    GROUP BY year, month_number, month
+    ORDER BY year, month_number
+  `;
+  connection.query(query, [staffId], (err, results) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error fetching payment graph for staff ${staffId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to fetch staff payment graph' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+/**
+ * @swagger
+ * /staff/{staffId}/payment/{expenseId}:
+ *   delete:
+ *     summary: Delete a specific salary payment for a staff member
+ *     description: Delete a specific salary payment record for a staff member by expense ID.
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the staff member
+ *       - in: path
+ *         name: expenseId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the salary payment (expense record)
+ *     responses:
+ *       200:
+ *         description: Staff payment deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff payment deleted successfully
+ *       404:
+ *         description: Staff payment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Staff payment not found
+ *       500:
+ *         description: Failed to delete staff payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Failed to delete staff payment
+ */
+app.delete('/staff/:staffId/payment/:expenseId', (req, res) => {
+  const { staffId, expenseId } = req.params;
+  const query = `
+    DELETE FROM expense
+    WHERE id = ? AND staff_id = ? AND expense_category = 'Salary'
+  `;
+  connection.query(query, [expenseId, staffId], (err, result) => {
+    if (err) {
+      logActivity('ERROR', 'expense', `Error deleting payment ${expenseId} for staff ${staffId}`, 'Admin');
+      return res.status(500).json({ error: 'Failed to delete staff payment' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Staff payment not found' });
+    }
+    logActivity('DELETE', 'expense', `Deleted payment ${expenseId} for staff ${staffId}`, 'Admin');
+    res.status(200).json({ message: 'Staff payment deleted successfully' });
+  });
+});
+
   app.post('/expense', (req, res) => {
     const { amount, expense_category, description } = req.body;
   
