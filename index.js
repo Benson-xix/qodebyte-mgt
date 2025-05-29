@@ -102,7 +102,7 @@ app.use(
  const upload = multer({ storage });
 
  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "mail.qodebyte.com",
     port: 465,
     secure: true,
     auth: {
