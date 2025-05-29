@@ -222,7 +222,10 @@ app.use(
           );
   
           const otpCode = crypto.randomInt(100000, 999999).toString();
-          const expirationTime = new Date(Date.now() + 5 * 60 * 1000);
+          const expirationTime = new Date(Date.now() + 5 * 60 * 1000)
+  .toISOString()
+  .slice(0, 19)
+  .replace('T', ' ');
   
           const otpQuery = `INSERT INTO register_otp (otp_code, inputed_email, expired) VALUES (?, ?, ?)`;
           connection.query(otpQuery, [otpCode, email, expirationTime], (otpErr) => {
@@ -453,7 +456,10 @@ app.use(
         const otpCode = crypto.randomInt(100000, 999999).toString();
   
        
-        const expirationTime = new Date(Date.now() + 5 * 60 * 1000);
+        const expirationTime = new Date(Date.now() + 5 * 60 * 1000)
+  .toISOString()
+  .slice(0, 19)
+  .replace('T', ' ');
   
       
         const otpQuery = `INSERT INTO register_otp (otp_code, inputed_email, expired) VALUES (?, ?, ?)`;
@@ -1168,7 +1174,10 @@ app.use(
       const otpCode = crypto.randomInt(100000, 999999).toString();
   
      
-      const expirationTime = new Date(Date.now() + 5 * 60 * 1000);
+     const expirationTime = new Date(Date.now() + 5 * 60 * 1000)
+  .toISOString()
+  .slice(0, 19)
+  .replace('T', ' ');
   
      
       const otpQuery = `INSERT INTO register_otp (otp_code, inputed_email, expired) VALUES (?, ?, ?)`;
