@@ -3900,66 +3900,7 @@ app.get('/staff-stats', async (req, res) => {
     });
   });
 
-/** 
-   * @swagger
-   * https://qodebyte-mgt.onrender.com/expense:
-   *   post:
-   *     summary: Create a new expense record
-   *     description: Create a new expense record
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             properties:
-   *               amount:
-   *                 type: number
-   *                 description: Amount of the expense
-   *                 example: 500.00
-   *               expense_category:
-   *                 type: string
-   *                 description: Category of the expense
-   *                 example: Office Supplies
-   *               description:
-   *                 type: string
-   *                 description: Description of the expense
-   *                 example: Purchased office chairs
-   *     responses:
-   *       201:
-   *         description: Expense created successfully
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: Expense created successfully
-   *                 expenseId:
-   *                   type: integer
-   *                   example: 1
-   *       400:
-   *         description: Bad request
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *                   example: Amount, Expense Category, and Description are required
-   *       500:
-   *         description: Failed to create expense
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *                   example: Failed to create expense
-   */
+
 
 /**
  * @swagger
@@ -4253,6 +4194,93 @@ app.delete('/staff/:staffId/payment/:expenseId', (req, res) => {
     res.status(200).json({ message: 'Staff payment deleted successfully' });
   });
 });
+
+  app.post('/expense', (req, res) => {
+    const { amount, expense_category, description } = req.body;
+  
+    if (!amount || !expense_category || !description) {
+      return res.status(400).json({ error: 'Amount, Expense Category, and Description are required' });
+    }
+  
+    const query = `
+      INSERT INTO expense (expense_description, amount, expense_category) 
+      VALUES (?, ?, ?)
+    `;
+  
+    const values = [description, amount, expense_category];
+  
+    connection.query(query, values, (err, result) => {
+      if (err) {
+        console.error('Error creating expense:', err);
+        logActivity('ERROR', 'expense', `Error creating expense: ${description}`, 'Admin');
+        return res.status(500).json({ error: 'Failed to create expense' });
+      }
+
+      logActivity('INSERT', 'expense', `Created expense with ID ${result.insertId}`, 'Admin');
+      res.status(201).json({ message: 'Expense created successfully', expenseId: result.insertId });
+    });
+  });
+
+  /**
+   * @swagger
+   * /expense:
+   *   post:
+   *     summary: Create a new expense record
+   *     description: Create a new expense record
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               amount:
+   *                 type: number
+   *                 description: Amount of the expense
+   *                 example: 500.00
+   *               expense_category:
+   *                 type: string
+   *                 description: Category of the expense
+   *                 example: Office Supplies
+   *               description:
+   *                 type: string
+   *                 description: Description of the expense
+   *                 example: Purchased office chairs
+   *     responses:
+   *       201:
+   *         description: Expense created successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 message:
+   *                   type: string
+   *                   example: Expense created successfully
+   *                 expenseId:
+   *                   type: integer
+   *                   example: 1
+   *       400:
+   *         description: Bad request
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Amount, Expense Category, and Description are required
+   *       500:
+   *         description: Failed to create expense
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 error:
+   *                   type: string
+   *                   example: Failed to create expense
+   */
 
   app.post('/expense', (req, res) => {
     const { amount, expense_category, description } = req.body;
