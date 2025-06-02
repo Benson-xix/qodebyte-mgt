@@ -4753,37 +4753,36 @@ app.delete('/staff/:staffId/payment/:expenseId', (req, res) => {
    *                   description: Error message
    *                   example: Failed to create revenue
    */
-  app.post('/revenue', (req, res) => {
-    const { customer_name, service_type, amount, revenue_description, method_of_payment } = req.body;
-  
-    
-    if (!customer_name || !service_type || !amount || !method_of_payment) {
-      return res.status(400).json({ error: 'Customer Name, Service Type, Amount, and Method of Payment are required' });
-    }
-  
-    const query = `
-      INSERT INTO revenue (customer_name, service_type, amount, revenue_description, method_of_payment) 
-      VALUES (?, ?, ?, ?, ?)
-    `;
-  
-    const values = [customer_name, service_type, amount, revenue_description, method_of_payment];
-  
-    connection.query(query, values, (err, result) => {
-      if (err) {
-        console.error('Error creating revenue:', err);
-        return res.status(500).json({ error: 'Failed to create revenue' });
-      }
+app.post('/revenue', (req, res) => {
+  const { customer_name, service_type, amount, revenue_description, method_of_payment } = req.body;
 
-      logActivity(
-        'INSERT',
-        'revenue',
-        `Added a new revenue record with ID ${result.insertId}`,
-        'Admin'
-      );
-  
-      res.status(201).json({ message: 'Revenue created successfully', revenueId: result.insertId });
-    });
+  if (!customer_name || !service_type || !amount || !method_of_payment) {
+    return res.status(400).json({ error: 'Customer Name, Service Type, Amount, and Method of Payment are required' });
+  }
+
+  const query = `
+    INSERT INTO revenue (customer_name, service_type, amount, revenue_description, method_of_payment, status) 
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [customer_name, service_type, amount, revenue_description, method_of_payment, 'completed'];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error creating revenue:', err);
+      return res.status(500).json({ error: 'Failed to create revenue' });
+    }
+
+    logActivity(
+      'INSERT',
+      'revenue',
+      `Added a new revenue record with ID ${result.insertId}`,
+      'Admin'
+    );
+
+    res.status(201).json({ message: 'Revenue created successfully', revenueId: result.insertId });
   });
+});
   /**
    * @swagger
    * /revenue:
