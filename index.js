@@ -2738,7 +2738,7 @@ cron.schedule('0 0 * * *', () => {
     skillsJson,
     documentIdsJson,
     gender, 
-    0
+    1
   ];
 
   connection.query(query, values, (err, result) => {
